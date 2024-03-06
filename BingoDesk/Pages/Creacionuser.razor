@@ -1,0 +1,189 @@
+﻿@page "/creacionuser"
+@using BingoDesk.Modelos
+@using System.Net;
+@using Newtonsoft.Json;
+@using System.Text;
+
+<center><h1>Crear Usuario</h1></center>
+<form>
+    
+      <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Nombre de usuario</label>
+         <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+         <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+    </div>
+
+        
+      <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Contraseña</label>
+         <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+         <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+    </div>
+
+        
+      <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Nombre</label>
+         <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+         <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+    </div>
+
+     
+        
+      <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Apellido Paterno</label>
+         <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+         <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+    </div>
+
+    
+        
+      <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Apellido Materno</label>
+         <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+         <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+    </div>
+
+
+     <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Secciones</label>
+         <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+         <div id="emailHelp" class="form-text">Coloca las secciones saparadas con una coma</div>
+    </div>
+
+    
+     <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Telefono</label>
+         <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+         <div id="emailHelp" class="form-text">Coloca las secciones saparadas con una coma</div>
+    </div>
+
+     <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Telefono</label>
+         <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+         <div id="emailHelp" class="form-text">Coloca las secciones saparadas con una coma</div>
+    </div>
+
+         <div class="mb-3">
+                <label for="exampleInputEmail1" class="form-label">Pais</label>
+                <select class="form-select" aria-label="Default select example">
+                  <option selected>Seleccione un pais</option>
+                  <option value="1">One</option>
+                  <option value="2">Two</option>
+                  <option value="3">Three</option>
+                </select>
+          </div>
+
+
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Estado</label>
+            <select class="form-select" aria-label="Default select example">
+              <option selected>Seleccione estado</option>
+              <option value="1">One</option>
+              <option value="2">Two</option>
+              <option value="3">Three</option>
+            </select>
+        </div>
+
+
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Region</label>
+            <select class="form-select" aria-label="Default select example">
+              <option selected>Seleccione Region</option>
+              <option value="1">One</option>
+              <option value="2">Two</option>
+              <option value="3">Three</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Municipio</label>
+            <select class="form-select" aria-label="Default select example">
+              <option selected>Seleccione Municipio</option>
+              <option value="1">One</option>
+              <option value="2">Two</option>
+              <option value="3">Three</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Distrito</label>
+            <select class="form-select" aria-label="Default select example">
+              <option selected>Seleccione distrito</option>
+              <option value="1">One</option>
+              <option value="2">Two</option>
+              <option value="3">Three</option>
+            </select>
+        </div>
+
+
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Usuario</label>
+            <select class="form-select" aria-label="Default select example">
+              <option selected>Seleccione el tipo de usuario</option>
+              <option value="1">One</option>
+              <option value="2">Two</option>
+              <option value="3">Three</option>
+            </select>
+        </div>
+
+
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Autobus</label>
+            <select class="form-select" aria-label="Default select example">
+              <option selected>Seleccione autobus al que pertenece</option>
+              <option value="1">One</option>
+              <option value="2">Two</option>
+              <option value="3">Three</option>
+            </select>
+        </div>
+
+         <button type="submit" class="btn btn-primary">Submit</button>
+
+</form>
+
+@code {
+    ModeloUsuarios usuarioenviado = new ModeloUsuarios();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var e = ActualizarEstado();
+
+    }
+    public async Task<string> ActualizarEstado()
+    {
+        try
+        {
+            var endpoind = "Usuarios/UpUsuarios";
+            var liga = "https://innovasegmx2.eastus2.cloudapp.azure.com/OCR/api/";
+            HttpClient cliente = new HttpClient();
+            cliente.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR||");
+            string Usuario = JsonConvert.SerializeObject(usuarioenviado);
+
+            HttpResponseMessage respuesta = await cliente.PostAsync(liga + endpoind,new StringContent(Usuario, Encoding.UTF8, "application/json"));
+
+            if (respuesta.StatusCode == HttpStatusCode.OK)
+            {
+                var r = await respuesta.Content.ReadAsStringAsync();
+
+            }
+            else
+            {
+                
+            }
+
+        }
+        catch (Exception)
+        {
+             return "Error";
+       
+        }
+
+
+
+        return "Ok";
+
+    }
+
+
+
+}

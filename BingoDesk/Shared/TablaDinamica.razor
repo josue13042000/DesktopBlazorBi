@@ -1,0 +1,623 @@
+﻿@using BingoDesk.Modelos
+@using Newtonsoft.Json;
+@using System.Net;
+@inject NavigationManager navigationManager
+@inject IJSRuntime JSRuntime
+
+
+<h1 style="font-size: 24px; font-weight: bold; color: #333; text-align: center;">Estatus de Participación Electoral de Individuos</h1>
+<br />
+
+
+
+<div class="ui @columnas column grid">
+   
+    <div class="column">
+        <div class="column">
+            <h4>Secciones</h4>
+        </div>
+
+        <div class="column">
+            <select class="form-select" aria-label="Default select example" @onchange="SeleccionarOpcion">
+
+                <option selected value="Todas">Todas</option>
+
+                @foreach (var item in Secciones)
+                {
+                    <option value="@item">@item</option>
+
+                }
+
+
+
+            </select>
+        </div>    
+      
+
+    </div>
+
+    @if (OpcionSeleccionada!="" && OpcionSeleccionada!="Todas")
+    {
+        @if (casillas!= null)
+        {
+            <div class="column">
+                <div class="column">
+                    <h4>Casillas</h4>
+                </div>
+
+                <div class="column">
+                    <select class="form-select" aria-label="Default select example" @onchange="SeleccionarOpcionCasilla">
+
+                        <option selected value="Todas">Todas</option>
+
+                        @foreach (var item in casillas)
+                        {
+                            <option value="@item">@item</option>
+
+                        }
+
+
+
+                    </select>
+                </div>
+            </div>
+        }
+      
+    }
+    else
+    {
+        
+    }
+
+
+
+
+
+
+    <div class="column">
+
+        <div class="ui compact menu">
+            <a class="item">
+                <i class="icon globe"></i> Totales
+                <div class="floating ui huge label" style="background-color:cornflowerblue"> @Totales</div>
+            </a>
+
+        </div>
+    </div>
+    <div class="column">
+
+        <div class="ui compact menu">
+            <a class="item">
+                <i class="icon user"></i> Faltantes
+                <div class="floating ui huge label" style="background-color:#33333D"> @Faltantes</div>
+            </a>
+
+        </div>
+
+
+
+    </div>
+
+    <div class="column">
+        <div class="ui compact menu">
+            <a class="item">
+                <i class="icon question"></i> Indefinidos
+                <div class="floating ui  huge label" style="background-color:#E8B844"> @Indefinidos</div>
+            </a>
+
+        </div>
+    </div>
+    <div class="column">
+
+        <div class="ui compact menu">
+
+            <a class="item">
+                <i class="icon check"></i> Promovidos
+                <div class="floating ui  huge label" style="background-color:#78d154"> @votados</div>
+            </a>
+        </div>
+        <div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+@if(!(ListaNominal is null))
+{
+     <div style="margin-top:20px;">
+        <div class="ui segment">
+        <table style=" font-family: Arial, sans-serif; font-size: 2.5rem; border-collapse: collapse; width: 100%;" class="ui  inverted table">
+        <thead >
+            <tr >
+
+                    <th style="border: 1px solid #999; padding: 10px; text-align: center;">Nombre</th>
+                    <th style ="border: 1px solid #999; padding: 10px; text-align: center;">Casilla</th>
+       
+                    <th style="border: 1px solid #999; padding: 10px; text-align: center;">Seccion</th>
+                    <th style="border: 1px solid #999; padding: 10px; text-align: center;">Credencial</th>
+
+            </tr>
+        </thead>
+       
+
+                    <div class="ui @activo inverted dimmer">
+                        <div class="ui medium text loader">Cargando..</div>
+                    </div>
+                    <p></p>
+                    <p></p>
+
+        <tbody>
+      
+
+            @foreach (var item in ListaNominal)
+            {
+          
+               
+                @if (item.Confirmado && item.BingoUsuario!="")
+                {
+
+                    <tr class="text-dark" style="background-color:#78d154">
+                            <td style="border: 1px solid #999; padding: 10px; text-align: center;">@item.Nombres @item.APaterno  @item.APaterno</td>
+                            @if (@item.Casilla == "0")
+                            {
+                                <td style="border: 1px solid #999; padding: 10px; text-align: center;">Principal</td>
+                            }
+                            else
+                            {
+                                <td style="border: 1px solid #999; padding: 10px; text-align: center;">Contigua @item.Casilla</td>
+                            }
+
+                            <td style="border: 1px solid #999; padding: 10px; text-align: center;">@item.Seccion</td>
+                                
+
+                         @if (item.Credenciales != "")
+                        {
+
+
+
+                                <td style="border: 1px solid #999; padding: 10px; text-align:center;font-size:1.5rem">
+                                    <button   class="ui black button" @onclick="@(() => { aceptarT(item.Id.ToString()); })">Ubicación del escaneo</button>
+
+                                   
+                          
+                            </td>
+                        }
+                        else
+                        {
+                                <td style="border: 1px solid #999; padding: 10px; text-align: center;">
+                                Sin fotografia
+                            </td>
+                            
+                        }
+
+                    </tr>
+                }
+                else if (item.Confirmado)
+                {
+                    <tr class="text-dark" style="background-color:#E8B844">
+                                <td style="border: 1px solid #999; padding: 10px; text-align: center;">@item.Nombres @item.APaterno @item.APaterno</td>
+                            @if (@item.Casilla == "0")
+                            {
+                                <td style="border: 1px solid #999; padding: 10px; text-align: center;">Principal</td>
+                            }
+                            else
+                            {
+                                <td style="border: 1px solid #999; padding: 10px; text-align: center;">Contigua @item.Casilla</td>
+                            }
+
+                            <td style="border: 1px solid #999; padding: 10px; text-align: center;">@item.Seccion</td>
+
+
+                        @if (item.Credenciales != "")
+                        {
+
+
+
+                                <td style="border: 1px solid #999; padding: 10px; text-align: center;font-size:1.5rem">
+                                        <button class="ui black button" @onclick="@(() => { aceptarT(item.Id.ToString()); })">Ubicación del escaneo</button>
+
+                                
+
+                            </td>
+                        }
+                        else
+                        {
+                                <td style="border: 1px solid #999; padding: 10px; text-align: center;">
+                                     Sin fotografia
+                                 </td>
+
+                        }
+
+                    </tr>
+                }
+                else
+                {
+
+
+                    <tr>
+                                <td style="border: 1px solid #999; padding: 10px; text-align: center;">@item.Nombres  @item.APaterno  @item.APaterno</td>
+                            @if (@item.Casilla=="0")
+                            {
+                                <td style="border: 1px solid #999; padding: 10px; text-align: center;">Principal</td>
+                            }
+                            else
+                            {
+                                <td  style="border: 1px solid #999; padding: 10px; text-align: center;">Contigua @item.Casilla</td>
+                            }
+
+
+
+
+
+                            <td style="border: 1px solid #999; padding: 10px; text-align: center;">@item.Seccion</td>
+                   
+
+                        @if (item.Credenciales != "")
+                        {
+
+                            string usuario = item.BingoUsuario;
+
+                            string credencial = item.Credenciales.Split("|")[0];
+
+
+
+                                <td style="border: 1px solid #999; padding: 10px; text-align: center;">
+
+                                        <button class="ui black button" @onclick="@(() => { aceptarT(item.Id.ToString()); })">Ubicación del escaneo</button>
+
+
+                                </td>
+                        }
+                        else
+                        {
+                                <td style="border: 1px solid #999; padding: 10px; text-align: center;">
+                                Sin fotografia
+                                </td>
+
+                        }
+                    </tr> 
+                }
+
+
+
+            }
+
+
+            </tbody>
+       
+        </table>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                    @for (int i = 0; i < paginas; i++)
+                    {
+                        
+                            <li class="page-item"><a class="page-link" href="#">@i</a></li>
+                    }
+              
+                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                </ul>
+            </nav>
+        </div>
+     </div>
+}
+
+else
+{
+    <h1 style="border: 1px solid #999; padding: 10px; text-align: center;font-size:1.5rem">Problemas con conexion espere un momento ...</h1>
+}
+
+
+
+@code {
+    public string columnas = "five";
+
+    public List<string> casillas = new List<string>();
+    public string casilla = "";
+    public List<ModeloListaNominal> ListaNominal = new List<ModeloListaNominal>();
+    public  int paginas = 0;
+    public List<string> Secciones = new List<string>();
+
+    public string OpcionSeleccionada= "";
+    public Timer timer;  // 5000 milisegundos = 5 segundos
+
+    public Timer timer2;  // 5000 milisegundos = 5 segundos
+    public string activo = "active";
+    [Inject]
+    protected NavigationManager Navegador { get; set; }
+
+    public string Totales = ""; 
+    public string votados = "";
+    public string Indefinidos = "";
+    public string Faltantes = "";
+
+
+    public async void SeleccionarOpcionCasilla(ChangeEventArgs e)
+    {
+        activo = "active";
+        casilla = e.Value.ToString();
+        var a = await GetRegistro(OpcionSeleccionada,casilla);
+        ListaNominal = a.Item2;
+        var B = await GetRegistro2(OpcionSeleccionada, casilla);
+
+        activo = "no";
+        StateHasChanged();
+    }
+
+    public async void SeleccionarOpcion(ChangeEventArgs e)
+    {
+
+        activo = "active";
+        //  timer.Dispose();
+        OpcionSeleccionada = e.Value.ToString();
+        if (OpcionSeleccionada != "Todas")
+        {
+            casilla = "";
+            casillas = await GetCasillas(OpcionSeleccionada);
+            columnas = "six";
+            StateHasChanged();
+
+        }
+        else
+        {
+            columnas = "five";
+            StateHasChanged();
+
+        }
+        var a = await GetRegistro(OpcionSeleccionada,"");
+        ListaNominal = a.Item2;
+
+
+
+        var B = await GetRegistro2(OpcionSeleccionada, "");
+        activo = "no";
+        StateHasChanged(); // Actualizar la interfaz de usuario
+                           //timer = new Timer(ActualizaDatos, null, 0, 5000);
+
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        if (firstRender)
+        {
+            timer = new Timer(ActualizaDatos, null, 0, 8000);
+
+        }
+        else
+        {
+
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        activo = "active";
+        var a = await GetRegistro(OpcionSeleccionada, "");
+
+        ListaNominal = a.Item2;
+        var a2 =await GetSecciones();
+        Secciones = a2.Item2;
+
+
+
+        var B = await GetRegistro2(OpcionSeleccionada, "");
+        activo = "no";
+    }
+
+    public async void ActualizaDatos(object state)
+
+    {
+
+        var a = await GetRegistro(OpcionSeleccionada, casilla);
+        ListaNominal =a.Item2;
+
+        var B = await GetRegistro2(OpcionSeleccionada, casilla);
+        await InvokeAsync(() =>
+         {
+             StateHasChanged(); // Actualizar la interfaz de usuario
+         });
+
+
+    }
+
+    private async Task<(string, List<ModeloListaNominal>)> GetRegistro2( string filtro1, string filtro2)
+    {
+
+        List<ModeloListaNominal> recibos = new List<ModeloListaNominal>();
+        List<ModeloListaNominal> recibos2 = new List<ModeloListaNominal>();
+
+        try
+        {
+            var Endpoint = "ListaNominal/GetListaNominalTabla";
+            var Liga = "https://innovasegmx2.eastus2.cloudapp.azure.com/OCR/api/";
+            HttpClient cliente = new HttpClient();
+            if (filtro1 == "" || filtro1 == "Todas") cliente.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|where t1.Confirmado=1 AND t2.BingoUsuario!='' order by t1.Confirmado desc,t1.APaterno,t1.AMaterno, t1.FH_Confirmacion desc|");
+            if (filtro1 != "" && filtro1 != "Todas" && (filtro2 == "" || filtro2 == "Todas")) cliente.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|where t1.Confirmado=1 AND t2.BingoUsuario!='' AND t1.Seccion={filtro1} order by t1.Confirmado desc,t1.APaterno,t1.AMaterno, t1.FH_Confirmacion desc|");
+            if (filtro1 != "" && filtro1 != "Todas" && (filtro2 != "") &&  filtro2 != "Todas") cliente.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|where t1.Confirmado=1 AND t2.BingoUsuario!='' AND  t1.seccion={filtro1} AND t1.casilla={filtro2} order by t1.Confirmado desc,t1.APaterno,t1.AMaterno, t1.FH_Confirmacion desc|");
+
+
+            HttpResponseMessage respuesta = await cliente.GetAsync(Liga + Endpoint);
+
+            if (respuesta.StatusCode == HttpStatusCode.OK)
+            {
+                var r = await respuesta.Content.ReadAsStringAsync();
+                recibos = JsonConvert.DeserializeObject<List<ModeloListaNominal>>(r);
+                votados = recibos.Count().ToString();
+
+                HttpClient cliente2 = new HttpClient();
+                if (filtro1 == "" || filtro1 == "Todas") cliente2.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|where t1.Confirmado=1 AND (t2.BingoUsuario IS NULL)  order by t1.Confirmado desc,t1.APaterno,t1.AMaterno, t1.FH_Confirmacion desc|");
+                if (filtro1 != "" && filtro1 != "Todas" && (filtro2 == "" || filtro2 == "Todas")) cliente2.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|where t1.Confirmado=1 AND t2.BingoUsuario IS NULL AND t1.Seccion={filtro1} order by t1.Confirmado desc,t1.APaterno,t1.AMaterno, t1.FH_Confirmacion desc|");
+                if (filtro1 != "" && filtro1 != "Todas" && (filtro2 != "" ) && filtro2 != "Todas") cliente2.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|where t1.Confirmado=1 AND t2.BingoUsuario IS NULL AND t1.seccion={filtro1} AND t1.casilla={filtro2} order by t1.Confirmado desc,t1.APaterno,t1.AMaterno, t1.FH_Confirmacion desc|");
+
+                HttpResponseMessage respuesta2 = await cliente2.GetAsync(Liga + Endpoint);
+
+
+                if (respuesta2.StatusCode == HttpStatusCode.OK)
+                {
+                    var r2 = await respuesta2.Content.ReadAsStringAsync();
+                    recibos2 = JsonConvert.DeserializeObject<List<ModeloListaNominal>>(r2);
+                    Indefinidos = recibos2.Count().ToString();
+                    Faltantes = (int.Parse(Totales) - (int.Parse(votados) + int.Parse(Indefinidos))).ToString();
+                    return ("OK", recibos);
+                }
+                else
+                {
+                    votados = "0";
+                    Indefinidos = "0";
+                    return (await respuesta.Content.ReadAsStringAsync(), recibos);
+                }
+
+            }
+            else
+            {
+                votados = "0";
+                return (await respuesta.Content.ReadAsStringAsync(), recibos);
+            }
+        }
+        catch (Exception ex)
+        {
+            votados = "0";
+            return (ex.Message, recibos);
+        }
+    }
+
+
+    private async Task<(string, List<ModeloListaNominal>)> GetRegistro(string filtro1,string filtro)
+    {
+
+        List<ModeloListaNominal> recibos = new List<ModeloListaNominal>();
+        try
+        {
+            var Endpoint = "ListaNominal/GetListaNominalTabla";
+            var Liga = "https://innovasegmx2.eastus2.cloudapp.azure.com/OCR/api/";
+            HttpClient cliente = new HttpClient();
+            if (filtro1 == "" || filtro1 == "Todas") cliente.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|order by t1.Confirmado desc,t1.APaterno,t1.AMaterno, t1.FH_Confirmacion desc|");
+            if (filtro1 != "" && filtro1 != "Todas" && (filtro =="" || filtro=="Todas")) cliente.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|where t1.seccion={filtro1} order by t1.Confirmado desc,t1.APaterno,t1.AMaterno, t1.FH_Confirmacion desc|");
+            if (filtro1 != "" && filtro1 != "Todas" && (filtro != "") && filtro != "Todas") cliente.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|where t1.seccion={filtro1} AND t1.casilla={filtro} order by t1.Confirmado desc,t1.APaterno,t1.AMaterno, t1.FH_Confirmacion desc|");
+
+
+            HttpResponseMessage respuesta = await cliente.GetAsync(Liga+ Endpoint);
+
+            if (respuesta.StatusCode == HttpStatusCode.OK)
+            {
+                var r = await respuesta.Content.ReadAsStringAsync();
+                recibos = JsonConvert.DeserializeObject<List<ModeloListaNominal>>(r);
+                Totales = recibos.Count().ToString();
+                paginas =int.Parse(Totales);
+                paginas = paginas / 1000;
+                paginas = (int)Math.Ceiling((double)paginas);
+                return ("OK", recibos);
+            }
+            else
+            {
+                Totales = "0";
+                return (await respuesta.Content.ReadAsStringAsync(), recibos);
+            }
+        }
+        catch (Exception ex)
+        {
+            Totales = "0";
+            return (ex.Message, recibos);
+        }
+    }
+
+    public void aceptarT(string id)
+    {
+        Navegador.NavigateTo($"/fetchdata/{id}");
+    }
+
+
+    private async Task<(string, List<string>)> GetSecciones()
+    {
+
+
+        List<string> secciones = new List<string>();
+
+
+        try
+        {
+            var Endpoint = "Global/GetLista_de_Datos";
+            var Liga = "https://innovasegmx2.eastus2.cloudapp.azure.com/OCR/api/";
+            HttpClient cliente = new HttpClient();
+            cliente.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|SELECT DISTINCT Seccion FROM [BINGO].[dbo].[ListaNominal]  ");
+            HttpResponseMessage respuesta = await cliente.GetAsync(Liga + Endpoint);
+
+
+            if (respuesta.StatusCode == HttpStatusCode.OK)
+            {
+                var r = await respuesta.Content.ReadAsStringAsync();
+                secciones = JsonConvert.DeserializeObject<List<string>>(r);
+          
+                return ("OK", secciones);
+            }
+            else
+            {
+                return (await respuesta.Content.ReadAsStringAsync(), secciones);
+             
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+            return (ex.Message, new List<string>());
+        }
+
+
+    }
+
+    private async Task<List<string>> GetCasillas(string seccion)
+    {
+
+
+        List<string> secciones = new List<string>();
+
+
+        try
+        {
+            var Endpoint = "Global/GetLista_de_Datos";
+            var Liga = "https://innovasegmx2.eastus2.cloudapp.azure.com/OCR/api/";
+            HttpClient cliente = new HttpClient();
+            cliente.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|select DISTINCT  Casilla from [BINGO].[dbo].[ListaNominal] where Seccion='{seccion}'");
+            HttpResponseMessage respuesta = await cliente.GetAsync(Liga + Endpoint);
+
+
+            if (respuesta.StatusCode == HttpStatusCode.OK)
+            {
+                var r = await respuesta.Content.ReadAsStringAsync();
+                secciones = JsonConvert.DeserializeObject<List<string>>(r);
+
+                return (secciones);
+            }
+            else
+            {
+                return (secciones);
+
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+            return (new List<string>());
+        }
+
+
+    }
+
+}

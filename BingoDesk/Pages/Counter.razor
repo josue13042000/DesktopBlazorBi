@@ -1,0 +1,50 @@
+﻿@page "/counter"
+@inject NavigationManager NavigationManager
+
+<div class="ui grid">
+ 
+    <div class="sixteen wide column">
+            <GraficoDinamico></GraficoDinamico>
+     </div>
+
+
+
+
+  
+  
+
+</div>
+
+@code{
+    [Inject]
+    protected NavigationManager Navegador { get; set; }
+    public Timer timer;  // 5000 milisegundos = 5 segundos
+    protected override async Task OnInitializedAsync()
+
+    {
+            
+
+    
+    }
+   
+
+    private async void IrAOtraPagina(object state)
+
+    {
+        NavigationManager.NavigateTo("/counter", true);
+        await InvokeAsync(() =>
+         {
+             StateHasChanged(); // Actualizar la interfaz de usuario
+         });
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+     //   timer = new Timer(IrAOtraPagina, null, 0, 800000);
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+
+}

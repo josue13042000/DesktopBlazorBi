@@ -1,0 +1,75 @@
+﻿
+<div class="top-row navbar navbar-dark">
+	<div class="container d-flex justify-content-center">
+		<img class="ui large image" src="/Images/bg.png" style="margin-top:-0.3rem;">
+		<button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+	</div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu" >
+	<nav class="flex-column" style="border-top:100px">
+
+		<div class="nav-item px-3">
+			
+		</div>
+		<div class="nav-item px-3 mb-2">
+		</div>
+		<div class="nav-item px-3 mb-2" >
+		</div>
+		<div class="nav-item px-3 mb-4">
+			<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+				<span class="" aria-hidden="true">
+					<i class="big  clipboard icon"></i>
+					Estatus de participación
+				</span>
+			</NavLink>
+		</div>
+
+		<div class="nav-item px-3">
+			<NavLink class="nav-link" href="counter">
+				<span class="" aria-hidden="true"><i class="big chart pie icon"></i>Estadisticas</span>
+			</NavLink>
+		</div>
+
+		<div class="nav-item px-3 mb-2">
+		</div>
+		<div class="nav-item px-3 mb-2">
+		</div>
+
+
+		<div class="nav-item px-3">
+			<NavLink class="nav-link" href="adminstracion">
+				<span class="" aria-hidden="true">
+					<i class="big sun outline icon"></i>Estadisticas
+				</span>
+			</NavLink>
+		</div>
+
+		<div class="nav-item px-3 mb-2">
+		</div>
+		<div class="nav-item px-3 mb-2">
+		</div>
+
+		<div class="nav-item px-3">
+			<NavLink class="nav-link" href="creacionuser">
+				<span class="" aria-hidden="true">
+					<i class="big paste icon"></i>Crear usuario
+				</span>
+			</NavLink>
+		</div>
+	
+	</nav>
+</div>
+
+@code {
+	private bool collapseNavMenu = true;
+
+	private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+	private void ToggleNavMenu()
+	{
+		collapseNavMenu = !collapseNavMenu;
+	}
+}

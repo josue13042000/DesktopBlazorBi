@@ -1,0 +1,123 @@
+﻿.grafico {
+    background-color: #fff;
+    height: 65VH;
+}
+
+#etiqueta1 {
+    font-size: 3rem;
+}
+#etiqueta3 {
+    font-size: 3rem;
+    color: rebeccapurple;
+}
+#etiqueta2 {
+    font-size: 3rem;
+}
+#etiqueta4 {
+    font-size: 3rem;
+}
+
+
+@media screen and (max-width: 1950px) {
+    .grafico {
+  
+        height: 65VH;
+    }
+
+    #etiqueta1 {
+        font-size: 2.5rem;
+    }
+    #etiqueta4 {
+        font-size: 2.5rem;
+    }
+    #etiqueta2 {
+        font-size: 2.5rem;
+    }
+
+    #etiqueta3 {
+        font-size: 2.5rem;
+    }
+    .texto1{
+        font-size:1.5rem;
+
+    }
+    .texto2 {
+        font-size: 1.5rem;
+    }
+    .texto3 {
+        font-size: 1.5rem;
+    }
+}
+
+
+@media screen and (max-height: 1250px) {
+    .grafico {
+ 
+        height: 60VH;
+
+        }
+    #etiqueta4 {
+        font-size: 2.5rem;
+    }
+        #etiqueta1 {
+        font-size: 2.5rem;
+    }
+
+    #etiqueta2 {
+        font-size: 2.5rem;
+    }
+
+    #etiqueta3 {
+        font-size: 2.5rem;
+    }
+
+    .texto1 {
+        font-size: 1.5rem;
+    }
+
+    .texto2 {
+        font-size: 1.5rem;
+    }
+
+    .texto3 {
+        font-size: 1.5rem;
+    }
+}
+
+
+@media screen and (max-width: 1200px) {
+    .grafico {
+   
+        height: 20VH;
+        
+
+    }
+
+    #etiqueta1 {
+        font-size: 1.8rem;
+    }
+    #etiqueta4 {
+        font-size: 1.8rem;
+    }
+
+    #etiqueta2 {
+        font-size: 1.8rem;
+    }
+
+    #etiqueta3 {
+        font-size: 1.8rem;
+    }
+
+    .texto1 {
+        font-size: 1.5rem;
+    }
+
+    .texto2 {
+        font-size: 1.5rem;
+    }
+
+    .texto3 {
+        font-size: 1.5rem;
+    }
+}
+

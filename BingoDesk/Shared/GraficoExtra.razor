@@ -1,0 +1,441 @@
+﻿@using BingoDesk.Modelos
+@using System.Net;
+@using Newtonsoft.Json;
+
+<h1 style="font-size: 24px; font-weight: bold; color: #333; text-align: center;">@Titulo</h1>
+
+
+
+<div class="ui two one centered grid" style="width:100%">
+
+    <div class="twelve wide column">
+        <select class="form-select" aria-label="Default select example" @onchange="SeleccionarOpcion">
+
+            <option selected value="Todas">Global</option>
+
+            @foreach (var item in Secciones)
+            {
+                <option value="@item">@item</option>
+
+            }
+
+
+
+        </select>
+
+    </div>
+
+</div>
+
+
+<div class="ui equal width center aligned padded grid">
+    <div class="row grafico" style="color: #FFFFFF">
+        <DoughnutChart class="donut" @ref="doughnutChart" Width="1000" />
+
+
+
+
+
+
+    </div>
+    <div class="row" style="margin-top:13rem">
+
+        <div class="column" style="width:33%">
+            <h2 class="texto1">Movilizados</h2>
+            <a id="etiqueta1" class="ui  circular label" style="background-color:#78d154">@votados0</a>
+
+        </div>
+        <div class="column" style="width:33%">
+            <h2 class="texto2">Indefinidos</h2>
+            <a id="etiqueta2" class="ui  circular label" style="background-color:#E8B844">@Indefinidos0</a>
+
+        </div>
+        <div class="column" style="width:33%">
+            <h2 class="texto3">Faltantes</h2>
+            <a id="etiqueta3" class="ui circular label" style="background-color:#F1EFEF;color:black">@Faltantes0</a>
+
+        </div>
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+@code {
+    public List<double> Datos = new List<double>() { 10, 20, 30 };
+    public string activo = "active";
+    public string Totales = "";
+
+    public string votados = "";
+    public string Titulo = "Perfíl Electoral Global - Estadísticas Actuales";
+    public string OpcionSeleccionada = "";
+    public string votados0 = "000000";
+    public string Indefinidos = "";
+
+    public string Indefinidos0 = "000000";
+
+    public string Faltantes = "";
+    public string Faltantes0 = "000000";
+
+    private int anchoPantalla;
+    private int altoPantalla;
+
+    public List<string> Secciones = new List<string>();
+    private DoughnutChart doughnutChart = default!;
+    private DoughnutChartOptions doughnutChartOptions = default!;
+    private ChartData chartData = default!;
+    private string[]? backgroundColors;
+    public Timer timer;  // 5000 milisegundos = 5 segundos
+
+    private int datasetsCount = 0;
+    private int dataLabelsCount = 0;
+
+    private Random random = new();
+
+    public async void SeleccionarOpcion(ChangeEventArgs e)
+    {
+        //  timer.Dispose();
+        OpcionSeleccionada = e.Value.ToString();
+        if (OpcionSeleccionada == "Global")
+        {
+
+            Titulo = $"Perfíl Electoral Global - Estadísticas Actuales";
+
+
+        }
+        else
+        {
+            Titulo = $"Perfil electoral seccion {OpcionSeleccionada} - Estadísticas Actuales";
+        }
+        await RandomizeAsync();
+
+        StateHasChanged(); // Actualizar la interfaz de usuario
+                           //timer = new Timer(ActualizaDatos, null, 0, 5000);
+
+    }
+    protected override async Task OnInitializedAsync()
+    {
+
+
+        backgroundColors = ColorBuilder.CategoricalTwelveColors;
+
+        // var a = GetDefaultDataLabels(3);
+        chartData = new ChartData { Labels = new List<string> { $"Votos", $"Indefinidos", $"Restante" }, Datasets = await GetDefaultDataSets(1) };
+        //  chartData = new ChartData { Labels = a, Datasets = await GetDefaultDataSets(1) };
+
+        doughnutChartOptions = new();
+        doughnutChartOptions.Responsive = true;
+        doughnutChartOptions.Plugins.Title.Text = "";
+        doughnutChartOptions.Plugins.Title.Display = true;
+
+     //   timer = new Timer(actualizarDatos, null, 0, 15000);
+        var a2 = await GetSecciones();
+        Secciones = a2.Item2;
+
+
+
+    }
+
+    private List<string> GetDefaultDataLabels(int numberOfLabels)
+    {
+        var labels = new List<string>();
+        for (var index = 0; index < numberOfLabels; index++)
+        {
+            labels.Add(GetNextDataLabel());
+            dataLabelsCount += 1;
+        }
+
+        return labels;
+    }
+    private async Task<(string, List<string>)> GetSecciones()
+    {
+
+
+        List<string> secciones = new List<string>();
+
+
+        try
+        {
+            var Endpoint = "Global/GetLista_de_Datos";
+            var Liga = "https://innovasegmx2.eastus2.cloudapp.azure.com/OCR/api/";
+            HttpClient cliente = new HttpClient();
+            cliente.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|SELECT DISTINCT Seccion FROM [BINGO].[dbo].[ListaNominal]  ");
+            HttpResponseMessage respuesta = await cliente.GetAsync(Liga + Endpoint);
+
+
+            if (respuesta.StatusCode == HttpStatusCode.OK)
+            {
+                var r = await respuesta.Content.ReadAsStringAsync();
+                secciones = JsonConvert.DeserializeObject<List<string>>(r);
+
+                return ("OK", secciones);
+            }
+            else
+            {
+                return (await respuesta.Content.ReadAsStringAsync(), secciones);
+
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+            return (ex.Message, new List<string>());
+        }
+
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        if (firstRender)
+        {
+            await RandomizeAsync();
+            await doughnutChart.InitializeAsync(chartData, doughnutChartOptions);
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+
+
+
+
+    #region Data Preparation
+
+    private async Task<List<IChartDataset>> GetDefaultDataSets(int numberOfDatasets)
+    {
+        var datasets = new List<IChartDataset>();
+
+        for (var index = 0; index < numberOfDatasets; index++)
+        {
+            datasets.Add(await GetRandomDoughnutChartDataset());
+        }
+
+        return datasets;
+    }
+
+
+
+    private async Task<DoughnutChartDataset> GetRandomDoughnutChartDataset()
+    {
+
+
+        datasetsCount += 1;
+        return new() { Label = $"Votos : {datasetsCount}", Data = Datos, BackgroundColor = new List<string> { "#78d154", "#E8B844", "#F1EFEF" } };
+
+    }
+
+    private string GetNextDataLabel() => $"Product {dataLabelsCount + 1}";
+
+
+
+
+    private async Task RandomizeAsync()
+    {
+        var VariableGenerica = await GetRegistro2(OpcionSeleccionada);
+        var VariableGenerica2 = await GetRegistro(OpcionSeleccionada);
+        if (chartData is null || chartData.Datasets is null || !chartData.Datasets.Any()) return;
+
+        var newDatasets = new List<IChartDataset>();
+
+        foreach (var dataset in chartData.Datasets)
+        {
+            if (dataset is DoughnutChartDataset doughnutChartDataset
+                && doughnutChartDataset is not null
+                && doughnutChartDataset.Data is not null)
+            {
+                var count = doughnutChartDataset.Data.Count;
+
+                var newData = new List<double>();
+
+                var restantes = int.Parse(Totales) - (int.Parse(votados) + int.Parse(Indefinidos));
+                Faltantes = restantes.ToString();
+                newData.Add(int.Parse(votados));
+                newData.Add(int.Parse(Indefinidos));
+
+                newData.Add(restantes);
+
+
+                doughnutChartDataset.Data = newData;
+                newDatasets.Add(doughnutChartDataset);
+            }
+        }
+
+        chartData.Datasets = newDatasets;
+
+        await doughnutChart.UpdateAsync(chartData, doughnutChartOptions);
+
+        votados0 = "";
+        Indefinidos0 = "";
+        Faltantes0 = "";
+        for (int i = 0; i < (6 - votados.Count()); i++)
+        {
+            votados0 += "0";
+        }
+        votados0 += votados;
+
+        for (int i = 0; i < (6 - Indefinidos.Count()); i++)
+        {
+            Indefinidos0 += "0";
+        }
+        Indefinidos0 += Indefinidos;
+
+        for (int i = 0; i < (6 - Faltantes.Count()); i++)
+        {
+            Faltantes0 += "0";
+        }
+        Faltantes0 += Faltantes;
+
+
+        StateHasChanged();
+    }
+
+
+    private async void actualizarDatos(object state)
+    {
+
+
+
+
+        await InvokeAsync(() =>
+      {
+          StateHasChanged(); // Actualizar la interfaz de usuario
+      });
+    }
+
+
+    private async Task<(string, List<ModeloListaNominal>)> GetRegistro(string filtro)
+    {
+
+        List<ModeloListaNominal> recibos = new List<ModeloListaNominal>();
+        try
+        {
+            var Endpoint = "ListaNominal/GetListaNominalTabla";
+            var Liga = "https://innovasegmx2.eastus2.cloudapp.azure.com/OCR/api/";
+            HttpClient cliente = new HttpClient();
+            if (filtro == "" || filtro == "Todas") cliente.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|order by t1.Confirmado desc,t1.APaterno,t1.AMaterno, t1.FH_Confirmacion desc|");
+            if (filtro != "" && filtro != "Todas") cliente.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|where t1.seccion={filtro} order by t1.Confirmado desc,t1.APaterno,t1.AMaterno, t1.FH_Confirmacion desc|");
+
+
+            HttpResponseMessage respuesta = await cliente.GetAsync(Liga + Endpoint);
+
+            if (respuesta.StatusCode == HttpStatusCode.OK)
+            {
+                var r = await respuesta.Content.ReadAsStringAsync();
+                recibos = JsonConvert.DeserializeObject<List<ModeloListaNominal>>(r);
+                Totales = recibos.Count().ToString();
+                return ("OK", recibos);
+            }
+            else
+            {
+                Totales = "0";
+                return (await respuesta.Content.ReadAsStringAsync(), recibos);
+            }
+        }
+        catch (Exception ex)
+        {
+            Totales = "0";
+            return (ex.Message, recibos);
+        }
+    }
+
+
+
+    private async Task<(string, List<ModeloListaNominal>)> GetRegistro2(string seccion)
+    {
+
+        List<ModeloListaNominal> recibos = new List<ModeloListaNominal>();
+        List<ModeloListaNominal> recibos2 = new List<ModeloListaNominal>();
+
+        try
+        {
+            var Endpoint = "ListaNominal/GetListaNominalTabla";
+            var Liga = "https://innovasegmx2.eastus2.cloudapp.azure.com/OCR/api/";
+            HttpClient cliente = new HttpClient();
+            if (seccion == "" || seccion == "Todas") cliente.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|where t1.Confirmado=1 AND t2.BingoUsuario!='' order by t1.Confirmado desc,t1.APaterno,t1.AMaterno, t1.FH_Confirmacion desc|");
+            if (seccion != "" && seccion != "Todas") cliente.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|where t1.Confirmado=1 AND t2.BingoUsuario!='' AND t1.Seccion={seccion} order by t1.Confirmado desc,t1.APaterno,t1.AMaterno, t1.FH_Confirmacion desc|");
+
+
+            HttpResponseMessage respuesta = await cliente.GetAsync(Liga + Endpoint);
+
+            if (respuesta.StatusCode == HttpStatusCode.OK)
+            {
+                var r = await respuesta.Content.ReadAsStringAsync();
+                recibos = JsonConvert.DeserializeObject<List<ModeloListaNominal>>(r);
+                votados = recibos.Count().ToString();
+
+                HttpClient cliente2 = new HttpClient();
+                if (seccion == "" || seccion == "Todas") cliente2.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|where t1.Confirmado=1 AND (t2.BingoUsuario IS NULL)  order by t1.Confirmado desc,t1.APaterno,t1.AMaterno, t1.FH_Confirmacion desc|");
+                if (seccion != "" && seccion != "Todas") cliente2.DefaultRequestHeaders.Add("Cabecera", $"94180508SC4N1N0CR|where t1.Confirmado=1 AND t2.BingoUsuario IS NULL AND t1.Seccion={seccion} order by t1.Confirmado desc,t1.APaterno,t1.AMaterno, t1.FH_Confirmacion desc|");
+
+
+                HttpResponseMessage respuesta2 = await cliente2.GetAsync(Liga + Endpoint);
+
+
+                if (respuesta2.StatusCode == HttpStatusCode.OK)
+                {
+                    var r2 = await respuesta2.Content.ReadAsStringAsync();
+                    recibos2 = JsonConvert.DeserializeObject<List<ModeloListaNominal>>(r2);
+                    Indefinidos = recibos2.Count().ToString();
+
+                    return ("OK", recibos);
+                }
+                else
+                {
+                    votados = "0";
+                    Indefinidos = "0";
+                    return (await respuesta.Content.ReadAsStringAsync(), recibos);
+                }
+
+            }
+            else
+            {
+                votados = "0";
+                return (await respuesta.Content.ReadAsStringAsync(), recibos);
+            }
+        }
+        catch (Exception ex)
+        {
+            votados = "0";
+            return (ex.Message, recibos);
+        }
+    }
+
+    //private List<string> GetRandomBackgroundColors()
+    //{
+    //    var colors = new List<string>();
+    //    for (var index = 0; index < dataLabelsCount; index++)
+    //    {
+    //        colors.Add("Red");
+    //    }
+
+    //    return colors;
+    //}
+
+
+
+
+
+    private string GetNextDataBackgrounfColor() => backgroundColors![dataLabelsCount];
+
+    #endregion  Data Preparation
+
+
+
+    //aqui empieza lo de las lineas
+
+
+
+
+
+}
